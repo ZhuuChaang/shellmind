@@ -9,7 +9,8 @@ class LocalLLM:
     def generate(
         self,
         prompt: str,
-        max_new_tokens: int = 256,
+        max_new_tokens: int = 512,
+        do_sample: bool = True,
         temperature: float = 0.7,
         top_p: float = 0.9,
     ) -> str:
@@ -18,12 +19,20 @@ class LocalLLM:
             return_tensors="pt"
         ).to(self.model.device)
 
+        gen_kwargs = {
+            "max_new_tokens": max_new_tokens,
+            "do_sample": do_sample,
+        }
+
+        if do_sample:
+            gen_kwargs.update({
+                "temperature": temperature,
+                "top_p": top_p,
+            })
+
         outputs = self.model.generate(
             **inputs,
-            max_new_tokens=max_new_tokens,
-            temperature=temperature,
-            top_p=top_p,
-            do_sample=True,
+            **gen_kwargs
         )
 
         return self.tokenizer.decode(
