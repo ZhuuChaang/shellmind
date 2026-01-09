@@ -1,6 +1,7 @@
 import json
 from agent.state import AgentState, AnalysisState
 from llm.inference import LocalLLM
+from agent.checker import extract_json
 
 
 def analyzer_node_factory(llm: LocalLLM):
@@ -23,6 +24,8 @@ User input:
 """
 
         raw = llm.generate(prompt, do_sample=False)
+        raw = extract_json(raw)
+
         analysis: AnalysisState = json.loads(raw)
 
         state["analysis"] = analysis

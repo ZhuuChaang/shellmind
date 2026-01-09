@@ -2,6 +2,7 @@
 import json
 from agent.state import AgentState, PlanState
 from llm.inference import LocalLLM
+from agent.checker import extract_json
 
 
 
@@ -12,11 +13,12 @@ def planner_node_factory(llm: LocalLLM):
         prompt = f"""
 You are a planner.
 
-Based on the analysis below, output ONLY valid JSON.
+Based on the analysis below.
 
 Analysis:
 {analysis}
 
+Output ONLY valid JSON with fields:
 Schema:
 - chain: "summarization_chain" | "qa_chain"
 - execution_mode: "single_step"
@@ -29,6 +31,7 @@ Schema:
 """
 
         raw = llm.generate(prompt, do_sample=False)
+        raw = extract_json(raw)
         plan: PlanState = json.loads(raw)
 
         state["plan"] = plan

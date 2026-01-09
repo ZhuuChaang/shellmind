@@ -14,10 +14,8 @@ class LocalLLM:
         temperature: float = 0.7,
         top_p: float = 0.9,
     ) -> str:
-        inputs = self.tokenizer(
-            prompt,
-            return_tensors="pt"
-        ).to(self.model.device)
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
+        input_len = inputs["input_ids"].shape[1]
 
         gen_kwargs = {
             "max_new_tokens": max_new_tokens,
@@ -35,7 +33,10 @@ class LocalLLM:
             **gen_kwargs
         )
 
+        # 只 decode 新生成部分
+        gen_tokens = outputs[0][input_len:]
+
         return self.tokenizer.decode(
-            outputs[0],
+            gen_tokens,
             skip_special_tokens=True
         )
