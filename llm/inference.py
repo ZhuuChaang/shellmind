@@ -1,4 +1,5 @@
 import torch
+from transformers import GenerationConfig
 
 class LocalLLM:
     def __init__(self, tokenizer, model):
@@ -17,20 +18,20 @@ class LocalLLM:
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
         input_len = inputs["input_ids"].shape[1]
 
-        gen_kwargs = {
-            "max_new_tokens": max_new_tokens,
-            "do_sample": do_sample,
-        }
+        # 基础生成参数
+        gen_config = GenerationConfig(
+            max_new_tokens=max_new_tokens,
+            do_sample=do_sample,
+        )
 
+        # 只在采样模式下传递 temperature/top_p
         if do_sample:
-            gen_kwargs.update({
-                "temperature": temperature,
-                "top_p": top_p,
-            })
+            gen_config.temperature = temperature
+            gen_config.top_p = top_p
 
         outputs = self.model.generate(
             **inputs,
-            **gen_kwargs
+            generation_config=gen_config
         )
 
         # 只 decode 新生成部分
