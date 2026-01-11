@@ -14,6 +14,8 @@ class LocalLLM:
         do_sample: bool = True,
         temperature: float = 0.7,
         top_p: float = 0.9,
+        no_repeat_ngram_size = 3,
+        repetition_penalty = 1.2 
     ) -> str:
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
         input_len = inputs["input_ids"].shape[1]
@@ -28,6 +30,8 @@ class LocalLLM:
         if do_sample:
             gen_config.temperature = temperature
             gen_config.top_p = top_p
+            gen_config.no_repeat_ngram_size = no_repeat_ngram_size
+            gen_config.repetition_penalty = repetition_penalty
 
         outputs = self.model.generate(
             **inputs,

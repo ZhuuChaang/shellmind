@@ -14,7 +14,10 @@ llm = load_llm("/mnt/sdb1/zc/.cache/modelscope/hub/models/Qwen/Qwen2.5-3B-Instru
 graph = build_graph(llm)
 
 
-with open("./test/testinput.txt", "r", encoding="utf-8") as f:
+# with open("./test/testinput.txt", "r", encoding="utf-8") as f:
+#     content = f.read()
+
+with open("./test/test2.txt", "r", encoding="utf-8") as f: #with rag
     content = f.read()
 
 state = {

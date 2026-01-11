@@ -1,5 +1,5 @@
 # shellmind
-
+A local scholar assistance agent with RAG.
 
 ## main arch
     tech-support-agent
