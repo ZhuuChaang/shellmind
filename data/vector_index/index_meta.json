@@ -1,0 +1,6 @@
+{
+  "dim": 384,
+  "metric": "ip",
+  "normalized": true,
+  "num_vectors": 910
+}
