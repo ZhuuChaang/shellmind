@@ -3,7 +3,7 @@ from agent.state import AgentState
 from llm.inference import LocalLLM
 from rag.rag import retrieve_rag_chunks  # 假设我们把函数保存为 rag_routines.py
 
-def qa_node_factory(llm: LocalLLM, top_k: int = 5):
+def qa_node_factory(llm: LocalLLM, top_k: int = 1):
     def qa_node(state: AgentState) -> AgentState:
         user_query = state["messages"][-1].content
 
@@ -16,9 +16,9 @@ def qa_node_factory(llm: LocalLLM, top_k: int = 5):
             )
             # 2. 整合到 prompt
             prompt = (
-                "Refer to the following document content to answer the question:\n"
+                "Refer to the following document contents:\n"
                 f"{chr(10).join(retrieved_chunks)}\n\n"
-                f"user question:{user_query}"
+                f"Answer the question:{user_query}"
             )
         else:
             prompt = user_query
@@ -31,7 +31,7 @@ def qa_node_factory(llm: LocalLLM, top_k: int = 5):
         }
 
         # 4. 调用 LLM
-        output = llm.generate(prompt, temperature=0.9, repetition_penalty=1.1)
+        output = llm.generate(prompt, temperature=0.7, repetition_penalty=1, no_repeat_ngram_size=0)
 
         # 5. 更新状态
         state["execution"]["status"] = "done"
