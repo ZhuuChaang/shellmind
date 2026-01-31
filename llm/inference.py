@@ -1,5 +1,8 @@
 import torch
 from transformers import GenerationConfig
+from dataclasses import dataclass
+from typing import Any, Optional
+from openai import OpenAI
 
 class LocalLLM:
     def __init__(self, tokenizer, model):
@@ -44,4 +47,62 @@ class LocalLLM:
         return self.tokenizer.decode(
             gen_tokens,
             skip_special_tokens=True
+        )
+    
+
+
+
+
+@dataclass
+class LLMResult:
+    content: Optional[str]
+    tool_calls: Optional[list[dict]]
+    raw: Any
+
+
+class QWenAPILLM:
+    def __init__(
+        self,
+        model: str = "qwen-plus",
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        timeout: float = 30.0,
+    ):
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout,
+        )
+        self.model = model
+
+    def generate(
+        self,
+        messages: list[dict],
+        *,
+        tools: list[dict] | None = None,
+        response_format: dict | None = None,
+        temperature: float = 0.0,
+    ) -> LLMResult:
+        kwargs = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": temperature,
+        }
+
+        if tools is not None:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = "auto"
+
+        if response_format is not None:
+            kwargs["response_format"] = response_format
+            # e.g. {"type": "json_schema", "json_schema": {...}}
+
+        resp = self.client.chat.completions.create(**kwargs)
+
+        msg = resp.choices[0].message
+
+        return LLMResult(
+            content=msg.content,
+            tool_calls=msg.tool_calls,
+            raw=resp,
         )
